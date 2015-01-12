@@ -5,6 +5,7 @@ using System.Text;
 
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
@@ -27,10 +28,20 @@ namespace AndroidActivityShortcut
 
             _items = new List<string>();
 
+            GetInstalledPackagesList();
+
             _items.AddRange(new List<string> {"a", "a", "a", "a"});
 
             ListAdapter=new ArrayAdapter<String>(this, Android.Resource.Layout.SimpleListItemMultipleChoice, _items);
 
+        }
+
+        private void GetInstalledPackagesList()
+        {
+            var installedPackages = PackageManager.GetInstalledPackages(PackageInfoFlags.Activities).ToList();
+            var installedIntentFilters = PackageManager.GetInstalledPackages(PackageInfoFlags.IntentFilters).ToList();
+
+            var a = 1 + 1;
         }
 
         public override View OnCreateView(View parent, string name, Context context, IAttributeSet attrs)
