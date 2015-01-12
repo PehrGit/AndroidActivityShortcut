@@ -18,6 +18,8 @@ namespace AndroidActivityShortcut
     public class ShortcutListActivity : ListActivity
     {
         private List<string> _items;
+        private List<PackageInfo> _installedPackages;
+        private List<string> _packageNames;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -26,22 +28,39 @@ namespace AndroidActivityShortcut
 
             //ListView.ChoiceMode = ChoiceMode.Multiple;
 
-            _items = new List<string>();
-
             GetInstalledPackagesList();
 
-            _items.AddRange(new List<string> {"a", "a", "a", "a"});
+            ListAdapter=new ArrayAdapter<String>(this, Android.Resource.Layout.SimpleListItemMultipleChoice, _packageNames);
 
-            ListAdapter=new ArrayAdapter<String>(this, Android.Resource.Layout.SimpleListItemMultipleChoice, _items);
+            var button = FindViewById<Button>(Resource.Id.TestButton);
+            button.Click += Button_Click;
+        }
 
+        private void Button_Click(object sender, EventArgs e)
+        {
+            var selectedItemIds = ListView.GetCheckItemIds();
+
+            var intents = new List<Intent>();
+
+            foreach (var selectedItemId in selectedItemIds)
+            {
+                var packagename = ((ArrayAdapter<string>) ListAdapter).GetItem((int)selectedItemId);
+                var intent = PackageManager.GetLaunchIntentForPackage(packagename);
+                intents.Add(intent);
+            }
+
+            StartActivities(intents.ToArray());
         }
 
         private void GetInstalledPackagesList()
         {
-            var installedPackages = PackageManager.GetInstalledPackages(PackageInfoFlags.Activities).ToList();
-            var installedIntentFilters = PackageManager.GetInstalledPackages(PackageInfoFlags.IntentFilters).ToList();
+            _installedPackages = PackageManager.GetInstalledPackages(PackageInfoFlags.Activities).ToList();
+            _packageNames = new List<string>();
 
-            var a = 1 + 1;
+            foreach (var installedPackage in _installedPackages)
+            {
+                _packageNames.Add(installedPackage.PackageName);
+            }
         }
 
         public override View OnCreateView(View parent, string name, Context context, IAttributeSet attrs)
